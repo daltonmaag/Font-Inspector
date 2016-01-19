@@ -8,6 +8,7 @@
 # GPLv3
 
 from robofab.world import *
+from robofab.objects.objectsBase import MOVE, LINE, CURVE, OFFCURVE
 
 
 # SVG pen implementation (C) 2012 by Andreas Eigendorf
@@ -39,9 +40,55 @@ class SVGpen(BasePen):
 # functions
 
 def svg(g):
-	pen = SVGpen(font)
-	g.draw(pen)
-	return pen.d
+	commands = {MOVE:'M',LINE:'L', CURVE:'Y','offcurve':'X', OFFCURVE:'X'}
+	svg = ''
+	contours = []
+	if len(g.components):
+		font.newGlyph('fontinspector')
+		new = font['fontinspector']
+		new.width = g.width
+		new.appendGlyph(g)
+		new.decompose()
+		g = new
+	if len(g):
+		for c in range(len(g)):
+			contours.append(g[c])
+	for i in range(len(contours)):
+		c = contours[i]
+		contour = end = ''
+		curve = False
+		points = list(c.points) # At least in Glyphs, changed to the points array change the actuall font data. Thous copy the list
+		if points[0].type == OFFCURVE:
+			points.append(points.pop(0))
+		if points[0].type == OFFCURVE:
+			points.append(points.pop(0))
+		for x in range(len(points)):
+			p = points[x]
+			command = commands[str(p.type)]
+			if command == 'X':
+				if curve == True:
+					command = ''
+				else:
+					command = 'C'
+					curve = True
+			if command == 'Y':
+				command = ''
+				curve = False
+			if x == 0:
+				command = 'M'
+				if p.type == 'curve':
+					end = ' ' + str(p.x) + ' ' + str(p.y)
+			contour += ' ' + command + str(p.x) + ' ' + str(p.y)
+		svg += ' ' + contour + end + 'z'
+	if font.has_key('fontinspector'):
+		font.removeGlyph('fontinspector')
+	return svg.strip()
+
+#def svg(g):
+#	pen = SVGpen(font)
+#	g.draw(pen)
+#	return pen.d
+
 def startPoints(g):
 	startPoints = []
 	for c in g:
