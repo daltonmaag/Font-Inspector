@@ -45,20 +45,11 @@ def svg(g):
 def startPoints(g):
 	startPoints = []
 	for c in g:
+		i = 0
 		points = c.points
-
-		# RoboFont
-		if points[0].type == 'offCurve':
-			points.append(points.pop(0))
-		if points[0].type == 'offCurve':
-			points.append(points.pop(0))
-		# Glyphs
-		if points[0].type == 'offcurve':
-			points.append(points.pop(0))
-		if points[0].type == 'offcurve':
-			points.append(points.pop(0))
-
-		startPoints.append([points[0].x,points[0].y])
+		while points[i].type == OFFCURVE:
+			i += 1
+		startPoints.append([points[i].x,points[i].y])
 	return startPoints
 def colorBot(color,inc):
 	if(len(color)==3): color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2]
