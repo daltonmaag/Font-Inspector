@@ -9,62 +9,39 @@
 
 from robofab.world import *
 
+
+# SVG pen implementation (C) 2012 by Andreas Eigendorf
+# licensed under MIT-style license
+# https://github.com/fontfont/RoboChrome/blob/master/RoboChrome.roboFontExt/lib/colorfont/svgPen.py
+
+from fontTools.pens.basePen import BasePen
+
+class SVGpen(BasePen):
+	def __init__(self, glyphSet):
+		BasePen.__init__(self, glyphSet)
+		self.d = u''
+
+	def _moveTo(self, (x,y)):
+		self.d += u'M%s %s' % (x,y)
+
+	def _lineTo(self, (x,y)):
+		self.d += u'L%s %s' % (x,y)
+
+	def _curveToOne(self, (x1,y1), (x2,y2), (x3,y3)):
+		self.d += u'C%d %d %d %d %d %d' % (int(round(x1)), int(round(y1)),
+		                                   int(round(x2)), int(round(y2)),
+		                                   int(round(x3)), int(round(y3)))
+
+	def _closePath(self):
+		self.d += u'Z'
+
+
 # functions
 
 def svg(g):
-	commands = {'move':'M','line':'L','curve':'Y','offcurve':'X','offCurve':'X'}
-	svg = ''
-	contours = []
-	if len(g.components):
-		font.newGlyph('fontinspector')
-		new = font['fontinspector']
-		new.width = g.width
-		new.appendGlyph(g)
-		new.decompose()
-		g = new
-	if len(g):
-		for c in range(len(g)):
-			contours.append(g[c])
-	for i in range(len(contours)):
-		c = contours[i]
-		contour = end = ''
-		curve = False
-		points = c.points
-		if len(points) == 0:
-			continue
-
-		# RoboFont
-		if points[0].type == 'offCurve':
-			points.append(points.pop(0))
-		if points[0].type == 'offCurve':
-			points.append(points.pop(0))
-		# Glyphs
-		if points[0].type == 'offcurve':
-			points.append(points.pop(0))
-		if points[0].type == 'offcurve':
-			points.append(points.pop(0))
-
-		for x in range(len(points)):
-			p = points[x]
-			command = commands[str(p.type)]
-			if command == 'X':
-				if curve == True:
-					command = ''
-				else:
-					command = 'C'
-					curve = True
-			if command == 'Y':
-				command = ''
-				curve = False
-			if x == 0:
-				command = 'M'
-				if p.type == 'curve':
-					end = ' ' + str(p.x) + ' ' + str(p.y)
-			contour += ' ' + command + str(p.x) + ' ' + str(p.y)
-		svg += ' ' + contour + end + 'z'
-	if font.has_key('fontinspector'):
-		font.removeGlyph('fontinspector')
-	return svg.strip()
+	pen = SVGpen(font)
+	g.draw(pen)
+	return pen.d
 def startPoints(g):
 	startPoints = []
 	for c in g:
