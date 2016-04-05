@@ -8,6 +8,7 @@
 # GPLv3
 
 from robofab.world import *
+from robofab.objects.objectsBase import OFFCURVE
 
 
 # SVG pen implementation (C) 2012 by Andreas Eigendorf
