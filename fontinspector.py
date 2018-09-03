@@ -157,7 +157,8 @@ for i in selection:
 			label = a.name
 			if label[0] == '_': label = label[1:]
 			if label not in data['anchors']:
-				data['anchors'][label] = colors1[len(data['anchors'])]
+				data['anchors'][label] = colors1[
+					len(data['anchors']) % len(colors1)]
 		if l < 0:
 			l *= -1
 			if l > data[glyph]['xL']: data[glyph]['xL'] = l
