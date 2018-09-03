@@ -575,4 +575,4 @@ if autoOpen:
 		elif os.name == 'nt':
 			os.startfile('"' + path + '"')
 else:
-	print filename + ' was generated to the current font\'s folder.'
+	print(filename + ' was generated to the current font\'s folder.')
