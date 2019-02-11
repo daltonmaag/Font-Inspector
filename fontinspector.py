@@ -104,13 +104,23 @@ def translate(scale,y):
 	aR = 'translate(' + str(round((wRow + xR) * scale)) + ',-' + str(round(y * scale)) + ')'
 	return	' data-left="'+aL+'" data-center="'+aC+'" data-right="'+aR+'" transform="'+aC+'"'
 
+
+class Cycle(object):
+	"""Wrap a small list and behave like a cycle but indexable."""
+	def __init__(self, finiteList):
+		self.finiteList = finiteList
+
+	def __getitem__(self, index):
+		return self.finiteList[index % len(self.finiteList)]
+
+
 # settings
 
 autoOpen = False
 scale = 100
-colors = ['0af','f60','0c8','faa','fc0','b6f', '0af','f60','faa','0c8','fc0','b6f']
-colors1 = ['93f','fc0','f8c','0ab','f30','08f', '93f','fc0','f8c','0ab','f30','08f']
-colors2 = colors1[::-1]
+colors = Cycle(['0af','f60','0c8','faa','fc0','b6f', '0af','f60','faa','0c8','fc0','b6f'])
+colors1 = Cycle(['93f','fc0','f8c','0ab','f30','08f', '93f','fc0','f8c','0ab','f30','08f'])
+colors2 = Cycle(colors1.finiteList[::-1])
 
 # reorder styles
 
@@ -157,8 +167,7 @@ for i in selection:
 			label = a.name
 			if label[0] == '_': label = label[1:]
 			if label not in data['anchors']:
-				data['anchors'][label] = colors1[
-					len(data['anchors']) % len(colors1)]
+				data['anchors'][label] = colors1[data['anchors']]
 		if l < 0:
 			l *= -1
 			if l > data[glyph]['xL']: data[glyph]['xL'] = l
@@ -509,7 +518,7 @@ $(document).ready(function() {
 		});
 
 		window.location.href = '#'+section+'-'+align+'-'+$('#scale').val()+'-'+color;
-		
+
 		if($.inArray(e.which,keys) !== -1) { return false; }
 	});
 });
